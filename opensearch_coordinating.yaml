@@ -1,0 +1,50 @@
+zabbix_export:
+  version: "7.0"
+  template_groups:
+    - uuid: f43b9a15b7374df3ad367ead192d0c64
+      name: "Opensearch"
+  templates:
+    - uuid: 6da9d11be12247099b42f9c99f72ab42
+      template: "Opensearch Coordinating Node Monitoring"
+      name: "Opensearch Coordinating Node Monitoring"
+      description: "This template is automatic added to Opensearch LLD  discovered with the cluster manager role."
+      groups:
+        - name: "Opensearch"
+      items:
+        - uuid: aed5ab28fb1b4b379c12d27ce42721b6
+          name: "Opensearch Discover nodes in cluster"
+          type: SCRIPT
+          key: opensearch.discover.nodes.stats
+          history: 1h
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            master= parameters['master'];
+            port = parameters['port'];
+            host = parameters['host']; 
+            auth = btoa(parameters['username']+":"+parameters['password'])
+            request = new HttpRequest();
+            request.addHeader('Authorization: Basic '+auth);
+            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");  
+            if(request.getStatus() == "200" ){
+            	return response;
+            }
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "120"
+          timeout: 30s
+          parameters:
+            - name: auth
+              value: "{$OPENSEARCH.APIKEY}"
+            - name: host
+              value: "{$HOSTIP}"
+            - name: master
+              value: "{$OPENSEARCH.MASTER}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"

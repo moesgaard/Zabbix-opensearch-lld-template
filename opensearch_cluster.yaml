@@ -1,0 +1,839 @@
+zabbix_export:
+  version: "7.0"
+  template_groups:
+    - uuid: f43b9a15b7374df3ad367ead192d0c64
+      name: "Opensearch"
+  host_groups:
+    - uuid: e8bb56d1165c47cbad0b850f5576fec8
+      name: "Opensearch"
+    - uuid: f18617e83d574f0585b541f70f285b7c
+      name: "Opensearch/Coordinating"
+    - uuid: 40a189ee336545edb2a7b3eaedda4ccf
+      name: "Opensearch/Data"
+    - uuid: bf084310ebda4a419212f3103dec80d6
+      name: "Opensearch/Ingest"
+    - uuid: a21d5b8073944e33a4f2bbbf21755753
+      name: "Opensearch/Master"
+  templates:
+    - uuid: b2860ee8ba574e44a069f8a627d7d8d5
+      template: "Opensearch Cluster Discovery"
+      name: "Opensearch Cluster Discovery"
+      description: "This template creates LLD host for each node and assignes template according to the roles, either dedicated  role or mixed toles."
+      groups:
+        - name: "Opensearch"
+      items:
+        - uuid: 87b58c3cee924073a2edd012cee4a9bf
+          name: "Opensearch get index stats"
+          type: SCRIPT
+          key: opensearch.cluster.index.stats
+          history: "0"
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/primaries/_stats");  
+            	   if(request.getStatus() == "200" ){
+            			return  '{ "data": ['+response+']}';
+            		}
+            }
+          description: "_all primaries indices Stats"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - "$.data[0]._all.primaries"
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+        - uuid: c5e2d84f554b4b638a8db8568d205f37
+          name: "Docs Count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.docs.count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.docs.count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 3239e0eed6174da1916971f3f62423f4
+          name: "Docs Deleted"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.docs.deleted
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.docs.deleted
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 67d47491468e4c7f97c47260791d545b
+          name: "Indexing  index failed"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.indexing.index_failed
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.indexing.index_failed
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 9df0b6f288844886a67ad0ca15c01f16
+          name: "Indexing is throttled"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.indexing.is_throttled
+          delay: "0"
+          trends: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.indexing.index_failed
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 71ebeb1fc8ba4047baafcf3514986184
+          name: "Query Cache cache count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.query_cache.cache_count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.query_cache.cache_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 4a214553892347ad9e1f45d8e9068b7a
+          name: "Query Cache evictions count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.query_cache.evictions
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.query_cache.evictions
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 3429aecabfc84ac08fe15411431ac567
+          name: "Query Cache hit count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.query_cache.hit_count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.query_cache.hit_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 2821aa13f52e4e5fba95ad0cd4f1b168
+          name: "Query Cache miss count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.query_cache.miss_count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.query_cache.miss_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 86c8e97c7311471699b9b02da255ea28
+          name: "Request cache hits"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.request_cache.hits_count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.request_cache.hit_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: b798658d82554193aba2e063e09c1cdb
+          name: "Request cache miss"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.request_cache.miss_count
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.request_cache.miss_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 82c236980f6c48aa95a9f554158d5ddd
+          name: "Opensearch get cluster stats"
+          type: SCRIPT
+          key: opensearch.cluster.stats
+          history: "0"
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/_cluster/health");  
+            	   if(request.getStatus() == "200" ){
+            			return  '{ "data": ['+response+']}';
+            		}
+            }
+          description: "Primary for cluster status."
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+        - uuid: fb2bcefe37124cd8a1ef1ac878c015da
+          name: "Opensearch Discover nodes in cluster"
+          type: SCRIPT
+          key: opensearch.discover.nodes
+          delay: 5m
+          history: "0"
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/_cluster/stats");  
+            	   if(request.getStatus() == "200" ){
+            			return response;
+            		}
+            }
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+        - uuid: 244f8b44ebd74a35a1510638a625c6d1
+          name: "Opensearch Discover nodes LLD in cluster"
+          type: SCRIPT
+          key: opensearch.discover.nodes.list
+          history: "0"
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+            master = parameters['master'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+            result = '';
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/_nodes/stats");  
+            	   if(request.getStatus() == "200" ){
+            			result = JSON.parse(response);
+            			if(master == ""){
+            				master = host[i];
+            			}
+            			break;
+            		}
+            }
+
+            if( result != ''){
+            	values = [];
+            	cluster = result.cluster_name;
+            	magic = result.nodes;
+
+            	for (var key in magic) {
+            		if( magic[key]['roles'] == ""){
+            				magic[key]['roles'] = ["coordinating"];
+            		}
+            		if(magic[key]['attributes']['zone'] == undefined){
+            			zones = '';
+            		}else{
+            			zones = magic[key]['attributes']['zone'];
+            		}
+            		values.push({'name': magic[key]['name'],'hostname': "{$OPENSEARCH.PREFIX}"+""+magic[key]['name']+"{$OPENSEARCH.SUFFIX}",'cluster': cluster ,'master': master,'host':  magic[key]['host'],'zone': ""+zones+"" ,'roles': magic[key]['roles']});
+            	}
+            	
+            	return '{"data":'+JSON.stringify(values)+"}";
+
+            }else{
+            	return "{}";
+            }
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "300"
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: master
+              value: "{INVENTORY.URL.A}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+        - uuid: ddda14ffa2de472bbb20f3f905337816
+          name: "Opensearch Discover true master in cluster"
+          type: SCRIPT
+          key: opensearch.discover.true.master
+          delay: 5m
+          history: 1h
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+            master = [];
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Keep-Alive: timeout=1, max=2')
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/_cat/master?format=json");  
+            	   if(request.getStatus() == "200" ){
+            			master = JSON.parse(response);
+            			return master[0].host;
+            			break;
+            		}
+            }
+          description: "this determins the master that is currently active"
+          inventory_link: URL_A
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+      discovery_rules:
+        - uuid: 527ae4de7b404a529b7b7218598c9849
+          name: "Opensearch information Discovery"
+          type: DEPENDENT
+          key: opensearch.discover.status
+          delay: "0"
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          item_prototypes:
+            - uuid: 8147f4cb362e4125b8936385b1c9d99c
+              name: "Cluster: {#CLUSTERNAME}  - Active primary shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.active_primary_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['active_primary_shards']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: e07fc450479345d399feb5055665c476
+              name: "Cluster: {#CLUSTERNAME}  - Active shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.active_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['active_shards']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 31336d941fe44664996603ab7c253b80
+              name: "Cluster: {#CLUSTERNAME} - Active shards percent"
+              type: DEPENDENT
+              key: "opensearch.cluster.active_shards_percent_as_number[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['active_shards_percent_as_number']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 00c24fe978674103ab77ebb6e4fc8d20
+              name: "Cluster: {#CLUSTERNAME} - Number of delayed unassigned shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.delayed_unassigned_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['delayed_unassigned_shards']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 41fad71635e14f15a5dc1cede31092a4
+              name: "Cluster: {#CLUSTERNAME} - Number of  initializing shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.initializing_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['initializing_shards']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 0edf497d7c9e425c87d29876f12153d7
+              name: "Cluster: {#CLUSTERNAME} - Number of  data nodes"
+              type: DEPENDENT
+              key: "opensearch.cluster.number_data_nodes[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['number_of_data_nodes']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 2dedcd71f5984d0b93bbbf4c2ad725ff
+              name: "Cluster: {#CLUSTERNAME} - Number of nodes"
+              type: DEPENDENT
+              key: "opensearch.cluster.number_nodes[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['number_of_nodes']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 74098f3877b541e2882c0c3d4e446bcb
+              name: "Cluster: {#CLUSTERNAME} - Number of pending shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.number_of_pending_tasks[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['number_of_pending_tasks']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 2aa145cf4dbf45e1b12c549f40368578
+              name: "Cluster: {#CLUSTERNAME} - Number of relocating shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.relocating_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['relocating_shards']"
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 197ea46aa173463282d040bccff160d8
+              name: "Cluster: {#CLUSTERNAME} - Health status"
+              type: DEPENDENT
+              key: "opensearch.cluster.status[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.data[0]['status']"
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      if (value == "green" ){
+                       return 0;
+                      }
+                      if (value == "yellow" ){
+                       return 1
+                      }
+                      if (value == "red" ){
+                       return 2;
+                      }
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+            - uuid: 8e2dbda8daf94979bc2bda7b0f9e4074
+              name: "Cluster: {#CLUSTERNAME} - Number of unassigned shards"
+              type: DEPENDENT
+              key: "opensearch.cluster.unassigned_shards[{#CLUSTERNAME}]"
+              delay: "0"
+              trends: "0"
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.data[0]["unassigned_shards"]'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "86400"
+              master_item:
+                key: opensearch.cluster.stats
+          master_item:
+            key: opensearch.cluster.stats
+          lld_macro_paths:
+            - lld_macro: "{#CLUSTERNAME}"
+              path: $.cluster_name
+        - uuid: 02132cc5addf45c7b02fd3a02e6838b9
+          name: "Opensearch Discover  Coordinating  nodes"
+          type: DEPENDENT
+          key: opensearch.lld.coordinating
+          delay: "0"
+          filter:
+            conditions:
+              - macro: "{#HOSTROLE}"
+                value: '\[\"coordinating\"\]'
+                formulaid: A
+          lifetime: 31d
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          host_prototypes:
+            - uuid: d77b210a75234b8bac83c65ba751004c
+              host: "{#HOSTNAME}"
+              name: "{#HOSTNAME}"
+              group_links:
+                - group:
+                    name: "Opensearch"
+                - group:
+                    name: "Opensearch/Coordinating"
+              templates:
+                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch Coordinating Node Monitoring"
+              macros:
+                - macro: "{$CLUSTERNAME}"
+                  value: "{#CLUSTERNAME}"
+                - macro: "{$HOSTIP}"
+                  value: "{#HOSTIP}"
+                - macro: "{$OPENSEARCH.MASTER}"
+                  value: "{#MASTER}"
+                - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
+                  value: '(^(\_|)search|internal).*$'
+              tags:
+                - tag: "Cluster Name"
+                  value: "{#CLUSTERNAME}"
+                - tag: Role
+                  value: Coordinating
+                - tag: Type
+                  value: Cluster
+                - tag: Zone
+                  value: "{#ZONE}"
+          master_item:
+            key: opensearch.discover.nodes.list
+          lld_macro_paths:
+            - lld_macro: "{#CLUSTERNAME}"
+              path: $.cluster
+            - lld_macro: "{#HOSTIP}"
+              path: $.host
+            - lld_macro: "{#HOSTNAME}"
+              path: $.hostname
+            - lld_macro: "{#HOSTROLE}"
+              path: $.roles
+            - lld_macro: "{#MASTER}"
+              path: $.master
+            - lld_macro: "{#NAME}"
+              path: $.name
+            - lld_macro: "{#ZONE}"
+              path: $.zone
+        - uuid: f23119ba7c334ecc83942b521a9e3093
+          name: "Opensearch Discover Data nodes"
+          type: DEPENDENT
+          key: opensearch.lld.datanodes
+          delay: "0"
+          filter:
+            conditions:
+              - macro: "{#HOSTROLE}"
+                value: '\[\"data\"\]'
+                formulaid: A
+          lifetime: 31d
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          host_prototypes:
+            - uuid: a36f40ddcc6f42428feae5a037c3a453
+              host: "{#HOSTNAME}"
+              name: "{#HOSTNAME}"
+              group_links:
+                - group:
+                    name: "Opensearch"
+                - group:
+                    name: "Opensearch/Data"
+              group_prototypes:
+                - name: "}Opensearch/Zone/{#ZONE}"
+              templates:
+                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch  Data Node Monitoring"
+              macros:
+                - macro: "{$CLUSTERNAME}"
+                  value: "{#CLUSTERNAME}"
+                - macro: "{$HOSTIP}"
+                  value: "{#HOSTIP}"
+                - macro: "{$OPENSEARCH.MASTER}"
+                  value: "{#MASTER}"
+                - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
+                  value: '(^.*read.*|^.*write.*|^(\_|)search.*|^.*get.*|^.*merge*|^.*flush.*)$'
+              tags:
+                - tag: Cluster
+                  value: "{#CLUSTERNAME}"
+                - tag: Role
+                  value: Data
+                - tag: Type
+                  value: Cluster
+                - tag: Zone
+                  value: "{#ZONE}"
+          master_item:
+            key: opensearch.discover.nodes.list
+          lld_macro_paths:
+            - lld_macro: "{#CLUSTERNAME}"
+              path: $.cluster
+            - lld_macro: "{#HOSTIP}"
+              path: $.host
+            - lld_macro: "{#HOSTNAME}"
+              path: $.hostname
+            - lld_macro: "{#HOSTROLE}"
+              path: $.roles
+            - lld_macro: "{#MASTER}"
+              path: $.master
+            - lld_macro: "{#NAME}"
+              path: $.name
+            - lld_macro: "{#ZONE}"
+              path: $.zone
+        - uuid: 0619d2c9cc4d49629b34e021e0763ce4
+          name: "Opensearch Discover nodes by type  in cluster"
+          type: DEPENDENT
+          key: opensearch.lld.hosts
+          delay: "0"
+          lifetime: 31d
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          item_prototypes:
+            - uuid: 7033abb111b743a2b322c25c2424deb4
+              name: "Host : {#HOSTNAME}"
+              type: SCRIPT
+              key: "hostfound[{#HOSTNAME}]"
+              value_type: CHAR
+              trends: "0"
+              params: |
+                parameters = JSON.parse(value);
+                infor = parameters.role;
+                if( infor.replace(/[^a-zA-Z]/g,'') == ""){
+                	return "Coordinating"
+                }else{
+                	return infor.replace(/[^a-zA-Z]/g, '');
+                }
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - "3600"
+              parameters:
+                - name: role
+                  value: "{#HOSTROLE}"
+          master_item:
+            key: opensearch.discover.nodes.list
+          lld_macro_paths:
+            - lld_macro: "{#HOSTIP}"
+              path: $.host
+            - lld_macro: "{#HOSTNAME}"
+              path: $.name
+            - lld_macro: "{#HOSTROLE}"
+              path: $.roles
+        - uuid: 961c0d0eefaa47b281530ead64e6dd85
+          name: "Opensearch Discover Ingest nodes"
+          type: DEPENDENT
+          key: opensearch.lld.ingest
+          delay: "0"
+          filter:
+            conditions:
+              - macro: "{#HOSTROLE}"
+                value: '\[\"ingest\"\]'
+                formulaid: A
+          lifetime: 31d
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          host_prototypes:
+            - uuid: 057df7a2a73842129fec7d15f3503710
+              host: "{#HOSTNAME}"
+              name: "{#HOSTNAME}"
+              group_links:
+                - group:
+                    name: "Opensearch"
+                - group:
+                    name: "Opensearch/Ingest"
+              templates:
+                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch  Ingest Node Monitoring"
+              macros:
+                - macro: "{$CLUSTERNAME}"
+                  value: "{#CLUSTERNAME}"
+                - macro: "{$HOSTIP}"
+                  value: "{#HOSTIP}"
+                - macro: "{$OPENSEARCH.MASTER}"
+                  value: "{#MASTER}"
+                - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
+                  value: "^.*(ingest|pipeline).*$"
+              tags:
+                - tag: "Cluster name"
+                  value: "{#CLUSTERNAME}"
+                - tag: Role
+                  value: ingest
+                - tag: Type
+                  value: Cluster
+                - tag: Zone
+                  value: "{#ZONE}"
+          master_item:
+            key: opensearch.discover.nodes.list
+          lld_macro_paths:
+            - lld_macro: "{#CLUSTERNAME}"
+              path: $.cluster
+            - lld_macro: "{#HOSTIP}"
+              path: $.host
+            - lld_macro: "{#HOSTNAME}"
+              path: $.hostname
+            - lld_macro: "{#HOSTROLE}"
+              path: $.roles
+            - lld_macro: "{#MASTER}"
+              path: $.master
+            - lld_macro: "{#NAME}"
+              path: $.name
+            - lld_macro: "{#ZONE}"
+              path: $.zone
+        - uuid: 5e1b5e307cd445a5832b231bfb0529c9
+          name: "Opensearch Discover Master nodes"
+          type: DEPENDENT
+          key: opensearch.lld.master
+          delay: "0"
+          filter:
+            conditions:
+              - macro: "{#HOSTROLE}"
+                value: /cluster\_manager/
+                formulaid: A
+          lifetime: 31d
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          host_prototypes:
+            - uuid: 13b1d0aa49a9492189988cb126f7f93f
+              host: "{#HOSTNAME}"
+              name: "{#HOSTNAME}"
+              group_links:
+                - group:
+                    name: "Opensearch"
+                - group:
+                    name: "Opensearch/Master"
+              templates:
+                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch  Master Node Monitoring"
+              macros:
+                - macro: "{$CLUSTERNAME}"
+                  value: "{#CLUSTERNAME}"
+                - macro: "{$HOSTIP}"
+                  value: "{#HOSTIP}"
+                - macro: "{$OPENSEARCH.MASTER}"
+                  value: "{#MASTER}"
+                - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
+                  value: "^.*(generic|snapshot|management|workflow).*$"
+              tags:
+                - tag: "Cluster Name"
+                  value: "{#CLUSTERNAME}"
+                - tag: Role
+                  value: Master
+                - tag: Type
+                  value: Cluster
+                - tag: Zone
+                  value: "{#ZONE}"
+              custom_interfaces: "YES"
+          master_item:
+            key: opensearch.discover.nodes.list
+          lld_macro_paths:
+            - lld_macro: "{#CLUSTERNAME}"
+              path: $.cluster
+            - lld_macro: "{#HOSTIP}"
+              path: $.host
+            - lld_macro: "{#HOSTNAME}"
+              path: $.hostname
+            - lld_macro: "{#HOSTROLE}"
+              path: $.roles
+            - lld_macro: "{#MASTER}"
+              path: $.master
+            - lld_macro: "{#NAME}"
+              path: $.name
+            - lld_macro: "{#ZONE}"
+              path: $.zone
+      macros:
+        - macro: "{$CLUSTERNAME}"
+        - macro: "{$OPENSEARCH.MASTER.LIST}"
+        - macro: "{$OPENSEARCH.PASSWORD}"
+          type: SECRET_TEXT
+        - macro: "{$OPENSEARCH.PREFIX}"
+        - macro: "{$OPENSEARCH.SUFFIX}"
+        - macro: "{$OPENSEARCH.THREADPOOL}"
+        - macro: '{$OPENSEARCH.THREADPOOL:"master"}'
+          value: "^.*(generic|snapshot|management).*$"
+        - macro: "{$OPENSEARCH.USERNAME}"
+          type: SECRET_TEXT

@@ -1,0 +1,67 @@
+zabbix_export:
+  version: "7.0"
+  template_groups:
+    - uuid: f43b9a15b7374df3ad367ead192d0c64
+      name: "IT/Service Delivery & Operations/IP Services/VAS/Opensearch"
+  templates:
+    - uuid: c07d933ab1d3425cabff12ccb552c799
+      template: "Norlys - Opensearch  Data Node Monitoring - VAS"
+      name: "Norlys - Opensearch  Data Node Monitoring - VAS"
+      description: "This template is automatic added to Opensearch LLD  discovered with the Data role."
+      groups:
+        - name: "IT/Service Delivery & Operations/IP Services/VAS/Opensearch"
+      items:
+        - uuid: 44b0edb5b65c4c01a4cba4c69eb3cd9a
+          name: "Opensearch Discover nodes in cluster"
+          type: SCRIPT
+          key: opensearch.discover.nodes.stats
+          history: 1h
+          value_type: TEXT
+          trends: "0"
+          params: |
+            parameters = JSON.parse(value);
+            master= parameters['master'];
+            port = parameters['port'];
+            host = parameters['host']; 
+            auth = btoa(parameters['username']+":"+parameters['password'])
+            request = new HttpRequest();
+            request.addHeader('Authorization: Basic '+auth);
+            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");  
+            if(request.getStatus() == "200" ){
+            	return response;
+            }
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.nodes
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "120"
+          timeout: 30s
+          parameters:
+            - name: auth
+              value: "{$OPENSEARCH.APIKEY}"
+            - name: host
+              value: "{$HOSTIP}"
+            - name: master
+              value: "{$OPENSEARCH.MASTER}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+        - uuid: 91d38280b97c471eaf301f6a7e63716d
+          name: "Failed  indices indexing"
+          type: DEPENDENT
+          key: opensearch.host.indices.indexing
+          delay: "0"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.indexing.index_failed
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
