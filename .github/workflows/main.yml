@@ -1,16 +1,16 @@
 - name: YAML Lint
-    uses: "ibiqlik/action-yamllint@v3.1.1"
-  with:
-    # File(s) or Directory, separate by space if multiple files or folder are specified
-    file_or_dir: # optional
-    # Path to custom configuration
-    config_file: # optional
-    # Custom configuration (as YAML source)
-    config_data: # optional
-    # Format for parsing output [parsable,standard,colored,github,auto]
-    format: # optional, default is parsable
-    # Return non-zero exit code on warnings as well as errors
-    strict: # optional, default is false
-    # Output only error level problems
-    no_warnings: # optional, default is false
+  uses: ibiqlik/action-yamllint@v3.1.1
+      with:
+        # File(s) or Directory, separate by space if multiple files or folder are specified
+        file_or_dir: # optional
+        # Path to custom configuration
+        config_file: # optional
+        # Custom configuration (as YAML source)
+        config_data: # optional
+        # Format for parsing output [parsable,standard,colored,github,auto]
+        format: # optional, default is parsable
+        # Return non-zero exit code on warnings as well as errors
+        strict: # optional, default is false
+        # Output only error level problems
+        no_warnings: # optional, default is false
           
