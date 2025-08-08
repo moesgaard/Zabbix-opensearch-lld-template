@@ -1,13 +1,16 @@
-  - name: yamllint
-  # You may pin to the exact commit or the version.
-  # uses: nosborn/github-action-yamllint@df09083daa8b9a6a3d9a3ab774007708148f3ee9
-    uses: nosborn/github-action-yamllint@v1
-      with:
-        # path to a custom configuration
-        config_file: # optional
-        # custom configuration (as YAML source)
-        config_data: # optional
-        # file(s) or directory
-        file_or_dir: 
-        # return non-zero exit code on warnings as well as errors
-        strict: # optional
+- name: YAML Lint
+    uses: "ibiqlik/action-yamllint@v3.1.1"
+  with:
+    # File(s) or Directory, separate by space if multiple files or folder are specified
+    file_or_dir: # optional
+    # Path to custom configuration
+    config_file: # optional
+    # Custom configuration (as YAML source)
+    config_data: # optional
+    # Format for parsing output [parsable,standard,colored,github,auto]
+    format: # optional, default is parsable
+    # Return non-zero exit code on warnings as well as errors
+    strict: # optional, default is false
+    # Output only error level problems
+    no_warnings: # optional, default is false
+          
