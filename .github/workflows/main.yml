@@ -1,14 +1,13 @@
   - name: yamllint
   # You may pin to the exact commit or the version.
   # uses: nosborn/github-action-yamllint@df09083daa8b9a6a3d9a3ab774007708148f3ee9
-  uses: nosborn/github-action-yamllint@v1
-  with:
-    # path to a custom configuration
-    config_file: # optional
-    # custom configuration (as YAML source)
-    config_data: # optional
-    # file(s) or directory
-    file_or_dir: 
-    # return non-zero exit code on warnings as well as errors
-    strict: # optional
-          
+    uses: nosborn/github-action-yamllint@v1
+      with:
+        # path to a custom configuration
+        config_file: # optional
+        # custom configuration (as YAML source)
+        config_data: # optional
+        # file(s) or directory
+        file_or_dir: 
+        # return non-zero exit code on warnings as well as errors
+        strict: # optional
