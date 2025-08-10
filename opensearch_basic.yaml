@@ -5,9 +5,9 @@ zabbix_export:
       name: "Opensearch/basic"
   templates:
     - uuid: e806e9868bcd4945b20946139001cff1
-      template: "Opensearch  Basic Node Monitoring"
-      name: "Opensearch  Basic Node Monitoring"
-      description: "This template is automatic added to Opensearch LLD  discovered with the cluster manager role."
+      template: "Opensearch Basic Node Monitoring"
+      name: "Opensearch Basic Node Monitoring"
+      description: "This template is automatic added to Opensearch LLD discovered hosts, as it contains the basic information for each host such as FS,OS,Threads and JVM information."
       groups:
         - name: "Opensearch/basic"
       items:
@@ -439,25 +439,25 @@ zabbix_export:
                 - color: 199C0D
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch  Basic Node Monitoring"
+                    host: "Opensearch Basic Node Monitoring"
                     key: "opensearch.host.thread_pool.active[{#NAME}]"
                 - sortorder: "1"
                   color: F63100
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch  Basic Node Monitoring"
+                    host: "Opensearch Basic Node Monitoring"
                     key: "opensearch.host.thread_pool.queue[{#NAME}]"
                 - sortorder: "2"
                   color: 2774A4
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch  Basic Node Monitoring"
+                    host: "Opensearch Basic Node Monitoring"
                     key: "opensearch.host.thread_pool.rejected[{#NAME}]"
                 - sortorder: "3"
                   color: F7941D
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch  Basic Node Monitoring"
+                    host: "Opensearch Basic Node Monitoring"
                     key: "opensearch.host.thread_pool.threads[{#NAME}]"
           master_item:
             key: opensearch.discover.nodes.basic.stats
@@ -472,7 +472,7 @@ zabbix_export:
                   keys = Object.keys(data[0]);
                   b_ob = [];
                   for(i = 0; i < keys.length; i++ ){
-                  b_ob.push({"{#NAME}": keys[i],"{#CLUSTERNAME}": "{$CLUSTERNAME}"});
+                    b_ob.push({"{#NAME}": keys[i],"{#CLUSTERNAME}": "{$CLUSTERNAME}"});
                   }
 
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
@@ -500,7 +500,7 @@ zabbix_export:
               master_item:
                 key: opensearch.discover.nodes.basic.stats
             - uuid: 1d15b8d98ea248f782ed3fffe1794852
-              name: "Garbage Collector  {#NAME}  collection time in milliseconds"
+              name: "Garbage Collector {#NAME} collection time in milliseconds"
               type: DEPENDENT
               key: "opensearch.lld.host.jvm.gc.collectors.collection_time_in_millis[{#NAME}]"
               delay: "0"
@@ -527,7 +527,7 @@ zabbix_export:
                   keys = Object.keys(data[0]);
                   b_ob = [];
                   for(i = 0; i < keys.length; i++ ){
-                  b_ob.push({"{#NAME}": keys[i]});
+                    b_ob.push({"{#NAME}": keys[i]});
                   }
 
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
