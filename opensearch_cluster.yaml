@@ -18,7 +18,7 @@ zabbix_export:
     - uuid: b2860ee8ba574e44a069f8a627d7d8d5
       template: "Opensearch Cluster Discovery"
       name: "Opensearch Cluster Discovery"
-      description: "This template creates LLD host for each node and assignes template according to the roles, either dedicated  role or mixed toles."
+      description: "This template creates LLD host for each node and assignes template according to the roles, this template also assigns a basic template to the LLD created hosts."
       groups:
         - name: "Opensearch"
       items:
@@ -566,7 +566,7 @@ zabbix_export:
                 - group:
                     name: "Opensearch/Coordinating"
               templates:
-                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch Basic Node Monitoring"
                 - name: "Opensearch Coordinating Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
@@ -628,7 +628,7 @@ zabbix_export:
               group_prototypes:
                 - name: "}Opensearch/Zone/{#ZONE}"
               templates:
-                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch Basic Node Monitoring"
                 - name: "Opensearch  Data Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
@@ -727,7 +727,7 @@ zabbix_export:
                 - group:
                     name: "Opensearch/Ingest"
               templates:
-                - name: "Opensearch  Basic Node Monitoring"
+                - name: "Opensearch Basic Node Monitoring"
                 - name: "Opensearch  Ingest Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
@@ -787,8 +787,8 @@ zabbix_export:
                 - group:
                     name: "Opensearch/Master"
               templates:
-                - name: "Opensearch  Basic Node Monitoring"
-                - name: "Opensearch  Master Node Monitoring"
+                - name: "Opensearch Basic Node Monitoring"
+                - name: "Opensearch Master Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
                   value: "{#CLUSTERNAME}"

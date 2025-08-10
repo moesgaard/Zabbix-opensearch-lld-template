@@ -5,9 +5,9 @@ zabbix_export:
       name: "Opensearch"
   templates:
     - uuid: 704afe90333a4010a9a5bec559b0923a
-      template: "Opensearch  Master Node Monitoring "
-      name: "Opensearch  Master Node Monitoring "
-      description: "This template is automatic added to Opensearch LLD  discovered with the cluster manager role."
+      template: "Opensearch Master Node Monitoring "
+      name: "Opensearch Master Node Monitoring "
+      description: "This template is automatic added to Opensearch LLD discovered with the cluster manager role."
       groups:
         - name: "Opensearch"
       items:
@@ -26,7 +26,7 @@ zabbix_export:
             auth = btoa(parameters['username']+":"+parameters['password'])
             request = new HttpRequest();
             request.addHeader('Authorization: Basic '+auth);
-            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");  
+            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");
             if(request.getStatus() == "200" ){
             	return response;
             }

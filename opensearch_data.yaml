@@ -2,14 +2,14 @@ zabbix_export:
   version: "7.0"
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
-      name: "IT/Service Delivery & Operations/IP Services/VAS/Opensearch"
+      name: "Opensearch"
   templates:
     - uuid: c07d933ab1d3425cabff12ccb552c799
-      template: "Norlys - Opensearch  Data Node Monitoring - VAS"
-      name: "Norlys - Opensearch  Data Node Monitoring - VAS"
-      description: "This template is automatic added to Opensearch LLD  discovered with the Data role."
+      template: "Opensearch Data Node Monitoring"
+      name: "Opensearch Data Node Monitoring"
+      description: "This template is automatic added to Opensearch LLD discovered with the Data role."
       groups:
-        - name: "IT/Service Delivery & Operations/IP Services/VAS/Opensearch"
+        - name: "Opensearch"
       items:
         - uuid: 44b0edb5b65c4c01a4cba4c69eb3cd9a
           name: "Opensearch Discover nodes in cluster"
