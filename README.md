@@ -7,7 +7,7 @@ The reason for this is to minimize custom edits.
 So you can upload the Template.yaml as a start and then customize to your liking.
 There is a standard alert for if the cluster is healthy.
 
-##TODO:
+##TODO
 + create Dashboard template
 + customize trigger for host type
 
