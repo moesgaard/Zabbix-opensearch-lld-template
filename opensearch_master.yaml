@@ -2,14 +2,17 @@ zabbix_export:
   version: "7.0"
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
-      name: "Opensearch"
+      name: Opensearch
   templates:
     - uuid: 704afe90333a4010a9a5bec559b0923a
-      template: "Opensearch Master Node Monitoring "
-      name: "Opensearch Master Node Monitoring "
-      description: "This template is automatic added to Opensearch LLD discovered with the cluster manager role."
+      template: "Opensearch Master Node Monitoring"
+      name: "Opensearch Master Node Monitoring"
+      description: "This template is automatic added to Opensearch LLD  discovered with the cluster manager role."
       groups:
-        - name: "Opensearch"
+        - name: Opensearch
+      vendor:
+        name: "moesgaardsdk"
+        version: 7.0-0
       items:
         - uuid: 4b8012bfb997465380a21c57b5ee1940
           name: "Opensearch Discover nodes in cluster"
@@ -17,7 +20,6 @@ zabbix_export:
           key: opensearch.discover.nodes.stats
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             master= parameters['master'];
@@ -26,11 +28,14 @@ zabbix_export:
             auth = btoa(parameters['username']+":"+parameters['password'])
             request = new HttpRequest();
             request.addHeader('Authorization: Basic '+auth);
-            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");
+            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");  
             if(request.getStatus() == "200" ){
             	return response;
             }
           preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.nodes
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - "120"
@@ -48,3 +53,9 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
+      tags:
+        - tag: target
+          value: opensearch

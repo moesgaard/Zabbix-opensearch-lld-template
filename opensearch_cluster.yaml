@@ -2,25 +2,28 @@ zabbix_export:
   version: "7.0"
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
-      name: "Opensearch"
+      name: Opensearch
   host_groups:
     - uuid: e8bb56d1165c47cbad0b850f5576fec8
-      name: "Opensearch"
+      name: Opensearch
     - uuid: f18617e83d574f0585b541f70f285b7c
-      name: "Opensearch/Coordinating"
+      name: Opensearch/Coordinating
     - uuid: 40a189ee336545edb2a7b3eaedda4ccf
-      name: "Opensearch/Data"
+      name: Opensearch/Data
     - uuid: bf084310ebda4a419212f3103dec80d6
-      name: "Opensearch/Ingest"
+      name: Opensearch/Ingest
     - uuid: a21d5b8073944e33a4f2bbbf21755753
-      name: "Opensearch/Master"
+      name: Opensearch/Master
   templates:
     - uuid: b2860ee8ba574e44a069f8a627d7d8d5
       template: "Opensearch Cluster Discovery"
       name: "Opensearch Cluster Discovery"
-      description: "This template creates LLD host for each node and assignes template according to the roles, this template also assigns a basic template to the LLD created hosts."
+      description: "This template creates LLD host for each node and assignes template according to the roles, either dedicated  role or mixed toles."
       groups:
-        - name: "Opensearch"
+        - name: Opensearch
+      vendor:
+        name: "moesgaardsdk"
+        version: 7.0-0
       items:
         - uuid: 87b58c3cee924073a2edd012cee4a9bf
           name: "Opensearch get index stats"
@@ -28,7 +31,6 @@ zabbix_export:
           key: opensearch.cluster.index.stats
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             hosts = parameters['hosts'].split(',');
@@ -60,11 +62,13 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: c5e2d84f554b4b638a8db8568d205f37
           name: "Docs Count"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.docs.count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -75,7 +79,6 @@ zabbix_export:
           name: "Docs Deleted"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.docs.deleted
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -86,7 +89,6 @@ zabbix_export:
           name: "Indexing  index failed"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.indexing.index_failed
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -97,7 +99,6 @@ zabbix_export:
           name: "Indexing is throttled"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.indexing.is_throttled
-          delay: "0"
           trends: "0"
           preprocessing:
             - type: JSONPATH
@@ -112,7 +113,6 @@ zabbix_export:
           name: "Query Cache cache count"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.query_cache.cache_count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -123,7 +123,6 @@ zabbix_export:
           name: "Query Cache evictions count"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.query_cache.evictions
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -134,7 +133,6 @@ zabbix_export:
           name: "Query Cache hit count"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.query_cache.hit_count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -145,18 +143,36 @@ zabbix_export:
           name: "Query Cache miss count"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.query_cache.miss_count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
                 - $.query_cache.miss_count
           master_item:
             key: opensearch.cluster.index.stats
+        - uuid: d4565ab6ca97467384fa57d4df63dffa
+          name: "Request cache count"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.request_cache.cache_count
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.request_cache.cache_count
+          master_item:
+            key: opensearch.cluster.index.stats
+        - uuid: 7b7cd959f5fd44628c30c39a677de6a9
+          name: "Request cache eviction"
+          type: DEPENDENT
+          key: opensearch.cluster.indices.stats.request_cache.evictions
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.request_cache.evictions
+          master_item:
+            key: opensearch.cluster.index.stats
         - uuid: 86c8e97c7311471699b9b02da255ea28
           name: "Request cache hits"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.request_cache.hits_count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -167,20 +183,58 @@ zabbix_export:
           name: "Request cache miss"
           type: DEPENDENT
           key: opensearch.cluster.indices.stats.request_cache.miss_count
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
                 - $.request_cache.miss_count
           master_item:
             key: opensearch.cluster.index.stats
+        - uuid: cbe58340da994f858ba3f61268a77006
+          name: "Opensearch get fs stats"
+          type: SCRIPT
+          key: opensearch.cluster.nodes.fs.metric
+          history: "0"
+          value_type: TEXT
+          params: |
+            parameters = JSON.parse(value);
+            hosts = parameters['hosts'].split(',');
+            port = parameters['port'];
+
+            auth = btoa(""+parameters['username']+':'+parameters['password']+"")
+
+            //Loop through master and first to respond with 200 tell us the nodes available and information. 
+            for(i = 0; i < hosts.length; i++){
+            	   request = new HttpRequest();
+            	   request.addHeader('Authorization: Basic '+auth);
+            	   response = request.get("https://"+hosts[i]+":"+port+"/_nodes/stats/fs");  
+            	   if(request.getStatus() == "200" ){
+            			return  '{ "data": ['+response+']}';
+            		}
+            }
+          description: "_all primaries indices Stats"
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - "$.data[0].nodes"
+          timeout: 30s
+          parameters:
+            - name: hosts
+              value: "{$OPENSEARCH.MASTER.LIST}"
+            - name: password
+              value: "{$OPENSEARCH.PASSWORD}"
+            - name: port
+              value: "9200"
+            - name: username
+              value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: 82c236980f6c48aa95a9f554158d5ddd
           name: "Opensearch get cluster stats"
           type: SCRIPT
           key: opensearch.cluster.stats
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             hosts = parameters['hosts'].split(',');
@@ -208,6 +262,9 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: fb2bcefe37124cd8a1ef1ac878c015da
           name: "Opensearch Discover nodes in cluster"
           type: SCRIPT
@@ -215,7 +272,6 @@ zabbix_export:
           delay: 5m
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             hosts = parameters['hosts'].split(',');
@@ -242,13 +298,15 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: 244f8b44ebd74a35a1510638a625c6d1
           name: "Opensearch Discover nodes LLD in cluster"
           type: SCRIPT
           key: opensearch.discover.nodes.list
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             hosts = parameters['hosts'].split(',');
@@ -309,14 +367,15 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: ddda14ffa2de472bbb20f3f905337816
           name: "Opensearch Discover true master in cluster"
           type: SCRIPT
           key: opensearch.discover.true.master
           delay: 5m
-          history: 1h
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             hosts = parameters['hosts'].split(',');
@@ -352,12 +411,59 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
       discovery_rules:
+        - uuid: da93e2cd36fb41fcbba808b9de87ec5e
+          name: "Opensearchfile system stats for dashboard"
+          type: DEPENDENT
+          key: opensearch.discover.fs.related
+          enabled_lifetime_type: DISABLE_AFTER
+          enabled_lifetime: 1h
+          item_prototypes:
+            - uuid: 8d7f59de2eaf45e99f3024d7ea99bfb8
+              name: "{#NAME} free in bytes"
+              type: DEPENDENT
+              key: "opensearch.lld.fs.total[{#NAME}]"
+              units: B
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      get_option = JSON.parse(value);
+                      for (var item in get_option){
+                      			if( get_option[item].name  == '{#NAME}'){
+                      				return JSON.stringify(get_option[item]);	
+                      		}
+                      }
+                - type: JSONPATH
+                  parameters:
+                    - $..fs.total.free_in_bytes
+                - type: TRIM
+                  parameters:
+                    - "[]"
+              master_item:
+                key: opensearch.cluster.nodes.fs.metric
+          master_item:
+            key: opensearch.cluster.nodes.fs.metric
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..name
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  info = JSON.parse(value);
+                  obj = [];
+                  for( i = 0 ; i < info.length; i++ ){
+                  		obj.push({"{#NAME}": ""+info[i]+"" });
+                  } 
+                  return JSON.stringify(obj);
         - uuid: 527ae4de7b404a529b7b7218598c9849
           name: "Opensearch information Discovery"
           type: DEPENDENT
           key: opensearch.discover.status
-          delay: "0"
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
           item_prototypes:
@@ -365,7 +471,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME}  - Active primary shards"
               type: DEPENDENT
               key: "opensearch.cluster.active_primary_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -380,7 +485,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME}  - Active shards"
               type: DEPENDENT
               key: "opensearch.cluster.active_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -395,7 +499,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Active shards percent"
               type: DEPENDENT
               key: "opensearch.cluster.active_shards_percent_as_number[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -410,7 +513,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of delayed unassigned shards"
               type: DEPENDENT
               key: "opensearch.cluster.delayed_unassigned_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -425,7 +527,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of  initializing shards"
               type: DEPENDENT
               key: "opensearch.cluster.initializing_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -440,7 +541,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of  data nodes"
               type: DEPENDENT
               key: "opensearch.cluster.number_data_nodes[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -455,7 +555,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of nodes"
               type: DEPENDENT
               key: "opensearch.cluster.number_nodes[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -470,7 +569,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of pending shards"
               type: DEPENDENT
               key: "opensearch.cluster.number_of_pending_tasks[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -485,7 +583,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Number of relocating shards"
               type: DEPENDENT
               key: "opensearch.cluster.relocating_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -500,7 +597,6 @@ zabbix_export:
               name: "Cluster: {#CLUSTERNAME} - Health status"
               type: DEPENDENT
               key: "opensearch.cluster.status[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -523,11 +619,27 @@ zabbix_export:
                     - "86400"
               master_item:
                 key: opensearch.cluster.stats
+              trigger_prototypes:
+                - uuid: 5fa34a107b7746389909be904d97ad36
+                  expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=2"
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=1 or  last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=0"
+                  name: "{#CLUSTERNAME} is in Red state"
+                  priority: HIGH
+                - uuid: e5d8fc7a4d0f45689a4f581adc150439
+                  expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=1"
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=0"
+                  name: "{#CLUSTERNAME} is in Yellow state"
+                  priority: WARNING
+                  dependencies:
+                    - name: "{#CLUSTERNAME} is in Red state"
+                      expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=2"
+                      recovery_expression: "last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=1 or  last(/Opensearch Cluster Discovery/opensearch.cluster.status[{#CLUSTERNAME}])=0"
             - uuid: 8e2dbda8daf94979bc2bda7b0f9e4074
               name: "Cluster: {#CLUSTERNAME} - Number of unassigned shards"
               type: DEPENDENT
               key: "opensearch.cluster.unassigned_shards[{#CLUSTERNAME}]"
-              delay: "0"
               trends: "0"
               preprocessing:
                 - type: JSONPATH
@@ -544,15 +656,13 @@ zabbix_export:
             - lld_macro: "{#CLUSTERNAME}"
               path: $.cluster_name
         - uuid: 02132cc5addf45c7b02fd3a02e6838b9
-          name: "Opensearch Discover  Coordinating  nodes"
+          name: "Opensearch Discover Coordinating nodes"
           type: DEPENDENT
           key: opensearch.lld.coordinating
-          delay: "0"
           filter:
             conditions:
               - macro: "{#HOSTROLE}"
                 value: '\[\"coordinating\"\]'
-                formulaid: A
           lifetime: 31d
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
@@ -562,9 +672,9 @@ zabbix_export:
               name: "{#HOSTNAME}"
               group_links:
                 - group:
-                    name: "Opensearch"
+                    name: Opensearch
                 - group:
-                    name: "Opensearch/Coordinating"
+                    name: Opensearch/Coordinating
               templates:
                 - name: "Opensearch Basic Node Monitoring"
                 - name: "Opensearch Coordinating Node Monitoring"
@@ -607,12 +717,10 @@ zabbix_export:
           name: "Opensearch Discover Data nodes"
           type: DEPENDENT
           key: opensearch.lld.datanodes
-          delay: "0"
           filter:
             conditions:
               - macro: "{#HOSTROLE}"
                 value: '\[\"data\"\]'
-                formulaid: A
           lifetime: 31d
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
@@ -622,14 +730,14 @@ zabbix_export:
               name: "{#HOSTNAME}"
               group_links:
                 - group:
-                    name: "Opensearch"
+                    name: Opensearch
                 - group:
-                    name: "Opensearch/Data"
+                    name: Opensearch/Data
               group_prototypes:
                 - name: "}Opensearch/Zone/{#ZONE}"
               templates:
                 - name: "Opensearch Basic Node Monitoring"
-                - name: "Opensearch  Data Node Monitoring"
+                - name: "Opensearch Data Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
                   value: "{#CLUSTERNAME}"
@@ -640,7 +748,7 @@ zabbix_export:
                 - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
                   value: '(^.*read.*|^.*write.*|^(\_|)search.*|^.*get.*|^.*merge*|^.*flush.*)$'
               tags:
-                - tag: Cluster
+                - tag: "Cluster Name"
                   value: "{#CLUSTERNAME}"
                 - tag: Role
                   value: Data
@@ -669,7 +777,6 @@ zabbix_export:
           name: "Opensearch Discover nodes by type  in cluster"
           type: DEPENDENT
           key: opensearch.lld.hosts
-          delay: "0"
           lifetime: 31d
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
@@ -679,7 +786,6 @@ zabbix_export:
               type: SCRIPT
               key: "hostfound[{#HOSTNAME}]"
               value_type: CHAR
-              trends: "0"
               params: |
                 parameters = JSON.parse(value);
                 infor = parameters.role;
@@ -708,12 +814,10 @@ zabbix_export:
           name: "Opensearch Discover Ingest nodes"
           type: DEPENDENT
           key: opensearch.lld.ingest
-          delay: "0"
           filter:
             conditions:
               - macro: "{#HOSTROLE}"
                 value: '\[\"ingest\"\]'
-                formulaid: A
           lifetime: 31d
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
@@ -723,12 +827,12 @@ zabbix_export:
               name: "{#HOSTNAME}"
               group_links:
                 - group:
-                    name: "Opensearch"
+                    name: Opensearch
                 - group:
-                    name: "Opensearch/Ingest"
+                    name: Opensearch/Ingest
               templates:
                 - name: "Opensearch Basic Node Monitoring"
-                - name: "Opensearch  Ingest Node Monitoring"
+                - name: "Opensearch Ingest Node Monitoring"
               macros:
                 - macro: "{$CLUSTERNAME}"
                   value: "{#CLUSTERNAME}"
@@ -739,7 +843,7 @@ zabbix_export:
                 - macro: "{$OPENSEARCH.THREADPOOL.FILTER}"
                   value: "^.*(ingest|pipeline).*$"
               tags:
-                - tag: "Cluster name"
+                - tag: "Cluster Name"
                   value: "{#CLUSTERNAME}"
                 - tag: Role
                   value: ingest
@@ -768,12 +872,10 @@ zabbix_export:
           name: "Opensearch Discover Master nodes"
           type: DEPENDENT
           key: opensearch.lld.master
-          delay: "0"
           filter:
             conditions:
               - macro: "{#HOSTROLE}"
-                value: /cluster\_manager/
-                formulaid: A
+                value: ".*cluster.*manager.*"
           lifetime: 31d
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
@@ -783,9 +885,9 @@ zabbix_export:
               name: "{#HOSTNAME}"
               group_links:
                 - group:
-                    name: "Opensearch"
+                    name: Opensearch
                 - group:
-                    name: "Opensearch/Master"
+                    name: Opensearch/Master
               templates:
                 - name: "Opensearch Basic Node Monitoring"
                 - name: "Opensearch Master Node Monitoring"
@@ -825,8 +927,16 @@ zabbix_export:
               path: $.name
             - lld_macro: "{#ZONE}"
               path: $.zone
+      tags:
+        - tag: class
+          value: "cluster discovery"
+        - tag: target
+          value: opensearch
+        - tag: type
+          value: "lld to host"
       macros:
         - macro: "{$CLUSTERNAME}"
+        - macro: "{$CLUSTEROWNER}"
         - macro: "{$OPENSEARCH.MASTER.LIST}"
         - macro: "{$OPENSEARCH.PASSWORD}"
           type: SECRET_TEXT
@@ -837,3 +947,54 @@ zabbix_export:
           value: "^.*(generic|snapshot|management).*$"
         - macro: "{$OPENSEARCH.USERNAME}"
           type: SECRET_TEXT
+  graphs:
+    - uuid: 60ea2e99d94d4e158624753f17002d9e
+      name: "{$CLUSTERNAME} : Query and Request cache"
+      graph_items:
+        - color: 199C0D
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.query_cache.cache_count
+        - sortorder: "1"
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.query_cache.evictions
+        - sortorder: "2"
+          color: 2774A4
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.query_cache.hit_count
+        - sortorder: "3"
+          color: F7941D
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.query_cache.miss_count
+        - sortorder: "4"
+          color: FC6EA3
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.request_cache.hits_count
+        - sortorder: "5"
+          color: 6C59DC
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.request_cache.miss_count
+        - sortorder: "6"
+          color: C7A72D
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.request_cache.cache_count
+        - sortorder: "7"
+          color: BA2A5D
+          calc_fnc: ALL
+          item:
+            host: "Opensearch Cluster Discovery"
+            key: opensearch.cluster.indices.stats.request_cache.evictions

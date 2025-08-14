@@ -2,22 +2,24 @@ zabbix_export:
   version: "7.0"
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
-      name: "Opensearch"
+      name: Opensearch
   templates:
     - uuid: c07d933ab1d3425cabff12ccb552c799
       template: "Opensearch Data Node Monitoring"
       name: "Opensearch Data Node Monitoring"
       description: "This template is automatic added to Opensearch LLD discovered with the Data role."
       groups:
-        - name: "Opensearch"
+        - name: Opensearch
+      vendor:
+        name: "moesgaardsdk"
+        version: 7.0-0
       items:
         - uuid: 44b0edb5b65c4c01a4cba4c69eb3cd9a
           name: "Opensearch Discover nodes in cluster"
           type: SCRIPT
           key: opensearch.discover.nodes.stats
-          history: 1h
+          history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             master= parameters['master'];
@@ -51,11 +53,13 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
         - uuid: 91d38280b97c471eaf301f6a7e63716d
           name: "Failed  indices indexing"
           type: DEPENDENT
           key: opensearch.host.indices.indexing
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -65,3 +69,205 @@ zabbix_export:
                 - "[]"
           master_item:
             key: opensearch.discover.nodes.stats
+        - uuid: 617a0320432d4b3a8c94c009947231a8
+          name: "Indices indexing current"
+          type: DEPENDENT
+          key: opensearch.host.indices.indexing.index_current
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.indexing.index_current
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: f10894d8850246a4b3a67bc0c0e59004
+          name: "Indices indexing total"
+          type: DEPENDENT
+          key: opensearch.host.indices.indexing.index_total
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.indexing.index_total
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 7d2c78d04cc54e838ad040977d00889d
+          name: "Indices fielddata memory size"
+          type: DEPENDENT
+          key: opensearch.host.indices.indices.fielddata.memory_size_in_bytes
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.fielddata.memory_size_in_bytes
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 2827e8e040294d7e859da7fd46145ef4
+          name: "Indices indexing index time"
+          type: DEPENDENT
+          key: opensearch.host.indices.indices.indexing.index_time_in_millis
+          value_type: FLOAT
+          units: s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.indexing.index_time_in_millis
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: MULTIPLIER
+              parameters:
+                - "0.001"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 705a19432b94445588779bcd230ec7f1
+          name: "indices search query time"
+          type: DEPENDENT
+          key: opensearch.host.indices.indices.search.query_time_in_millis
+          value_type: FLOAT
+          units: s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.search.query_time_in_millis
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: MULTIPLIER
+              parameters:
+                - "0.001"
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: dfd3914c181645799640e36de223b97d
+          name: "Indices store size"
+          type: DEPENDENT
+          key: opensearch.host.indices.indices.store.size_in_bytes
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.store.size_in_bytes
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 7d29505cbf71450992aa457c2ae62828
+          name: "Indices query cache memory size"
+          type: DEPENDENT
+          key: opensearch.host.indices.query_cache.memory_size_in_bytes
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.query_cache.memory_size_in_bytes
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: e429bb09bd9149bf8302578b4cb4df54
+          name: "Indices search query total"
+          type: DEPENDENT
+          key: opensearch.host.indices.search.query_total
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.search.query_total
+            - type: TRIM
+              parameters:
+                - "[]"
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - "3600"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 9f0347efb0834c12ad3113ffe4ec4406
+          name: "Indices segments count"
+          type: DEPENDENT
+          key: opensearch.host.indices.segments.count
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..indices.segments.count
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: d7aa449536a84239be4347b81e110367
+          name: "Transport tcp rx"
+          type: DEPENDENT
+          key: opensearch.host.transport.tcp.rx_bytes
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..transport.tcp.rx_bytes
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: d3949c15cb24412c9cf80a875f6cd9c0
+          name: "Transport tcp rx packet"
+          type: DEPENDENT
+          key: opensearch.host.transport.tcp.rx_packet
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..transport.tcp.rx_packet
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 0ec7d70c02224bc8bd58154cd893c03c
+          name: "Transport tcp tx"
+          type: DEPENDENT
+          key: opensearch.host.transport.tcp.tx_bytes
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..transport.tcp.tx_bytes
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+        - uuid: 7870f75dd7f943d6a64be722015a3a0f
+          name: "Transport tcp tx packet"
+          type: DEPENDENT
+          key: opensearch.host.transport.tcp.tx_packet
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..transport.tcp.tx_packet
+            - type: TRIM
+              parameters:
+                - "[]"
+          master_item:
+            key: opensearch.discover.nodes.stats
+      tags:
+        - tag: target
+          value: opensearch
