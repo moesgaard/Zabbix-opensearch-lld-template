@@ -2,14 +2,19 @@ zabbix_export:
   version: "7.0"
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
-      name: "Opensearch"
+      name: Opensearch
   templates:
     - uuid: e806e9868bcd4945b20946139001cff1
       template: "Opensearch Basic Node Monitoring"
       name: "Opensearch Basic Node Monitoring"
-      description: "This template is automatic added to Opensearch LLD discovered with the cluster manager role."
+      description: |
+        This template is automatic added to Opensearch LLD discovered hosts.
+        this contains systemwide specs, that is not dependend on the role.
       groups:
-        - name: "Opensearch"
+        - name: Opensearch
+      vendor:
+        name: "moesgaardsdk"
+        version: 7.0-0
       items:
         - uuid: 00e1f6c559c44a998344ccf246cde192
           name: "Opensearch Discover basic discovery"
@@ -17,7 +22,6 @@ zabbix_export:
           key: opensearch.discover.nodes.basic.stats
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             master= parameters['master'];
@@ -51,7 +55,6 @@ zabbix_export:
                   newset.push({'fs': fsInfo });
                   newset.push({'thread_pool': tpInfo });
                   return JSON.stringify(newset);
-
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - "120"
@@ -78,7 +81,6 @@ zabbix_export:
           key: opensearch.discover.nodes.basic.tasks
           history: "0"
           value_type: TEXT
-          trends: "0"
           params: |
             parameters = JSON.parse(value);
             master= parameters['master'];
@@ -116,7 +118,6 @@ zabbix_export:
           name: "JVM Memory pools old used in bytes"
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.old.used_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -139,7 +140,6 @@ zabbix_export:
           name: "JVM Memory pools survivor used in bytes"
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.survivor.used_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -162,7 +162,6 @@ zabbix_export:
           name: "JVM Memory pools young used in bytes"
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.young.used_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -185,7 +184,6 @@ zabbix_export:
           name: "JVM System Uptime"
           type: DEPENDENT
           key: opensearch.host..jvm.uptime_in_millis
-          delay: "0"
           units: s
           preprocessing:
             - type: JSONPATH
@@ -208,7 +206,6 @@ zabbix_export:
           name: "FS IO stats read operrations"
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.read_operations
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -230,7 +227,6 @@ zabbix_export:
           name: "FS IO stats read  time in ms"
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.read_time
-          delay: "0"
           units: s
           preprocessing:
             - type: JSONPATH
@@ -256,7 +252,6 @@ zabbix_export:
           name: "FS IO stats write operrations"
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.write_operations
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -278,7 +273,6 @@ zabbix_export:
           name: "FS IO stat write time in ms"
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.write_time
-          delay: "0"
           units: s
           preprocessing:
             - type: JSONPATH
@@ -304,7 +298,6 @@ zabbix_export:
           name: "FS total free in bytes"
           type: DEPENDENT
           key: opensearch.host.fs.total.free_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -327,7 +320,6 @@ zabbix_export:
           name: "JVM Memory Heap Max"
           type: DEPENDENT
           key: opensearch.host.jvm.mem.heap_max_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -350,7 +342,6 @@ zabbix_export:
           name: "JVM Memory Heap Used"
           type: DEPENDENT
           key: opensearch.host.jvm.mem.heap_used_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -373,7 +364,6 @@ zabbix_export:
           name: "OS CPU Load avg 1 min"
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.1m
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -395,7 +385,6 @@ zabbix_export:
           name: "OS CPU Load avg 5 min"
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.5m
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -417,7 +406,6 @@ zabbix_export:
           name: "OS CPU Load avg 15 min"
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.15m
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -439,7 +427,6 @@ zabbix_export:
           name: "OS CPU percent used"
           type: DEPENDENT
           key: opensearch.host.os.cpu.persent
-          delay: "0"
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -461,7 +448,6 @@ zabbix_export:
           name: "OS Memory Used"
           type: DEPENDENT
           key: opensearch.host.os.mem.used_in_bytes
-          delay: "0"
           units: B
           preprocessing:
             - type: JSONPATH
@@ -485,18 +471,15 @@ zabbix_export:
           name: "Thread pool low level discovery"
           type: DEPENDENT
           key: opensearch.lld.host.thread_pool
-          delay: "0"
           filter:
             conditions:
               - macro: "{#NAME}"
                 value: "{$OPENSEARCH.THREADPOOL.FILTER}"
-                formulaid: A
           item_prototypes:
             - uuid: 075cc53f2e55479bbca4bab19b8d57a5
               name: "Thread {#NAME} active size"
               type: DEPENDENT
               key: "opensearch.host.thread_pool.active[{#NAME}]"
-              delay: "0"
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -518,7 +501,6 @@ zabbix_export:
               name: "Thread {#NAME} queue size"
               type: DEPENDENT
               key: "opensearch.host.thread_pool.queue[{#NAME}]"
-              delay: "0"
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -540,7 +522,6 @@ zabbix_export:
               name: "Thread {#NAME} rejected size"
               type: DEPENDENT
               key: "opensearch.host.thread_pool.rejected[{#NAME}]"
-              delay: "0"
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -562,7 +543,6 @@ zabbix_export:
               name: "Thread {#NAME} threads size"
               type: DEPENDENT
               key: "opensearch.host.thread_pool.threads[{#NAME}]"
-              delay: "0"
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -620,7 +600,7 @@ zabbix_export:
                   keys = Object.keys(data[0]);
                   b_ob = [];
                   for(i = 0; i < keys.length; i++ ){
-                    b_ob.push({"{#NAME}": keys[i],"{#CLUSTERNAME}": "{$CLUSTERNAME}"});
+                  b_ob.push({"{#NAME}": keys[i],"{#CLUSTERNAME}": "{$CLUSTERNAME}"});
                   }
 
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
@@ -628,15 +608,13 @@ zabbix_export:
           name: "Garbage Collector"
           type: DEPENDENT
           key: opensearch.lld.jvm.gc.collector
-          delay: "0"
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
           item_prototypes:
             - uuid: 9b0fc159d2024165ad3afea20c5b9d48
-              name: "Garbage Collector {#NAME} collection count"
+              name: "Garbage Collector  {#NAME}  collection count"
               type: DEPENDENT
               key: "opensearch.lld.host.jvm.gc.collectors.collection_count[{#NAME}]"
-              delay: "0"
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -650,10 +628,9 @@ zabbix_export:
                 - tag: component
                   value: collector
             - uuid: 1d15b8d98ea248f782ed3fffe1794852
-              name: "Garbage Collector {#NAME} collection time in milliseconds"
+              name: "Garbage Collector  {#NAME}  collection time in milliseconds"
               type: DEPENDENT
               key: "opensearch.lld.host.jvm.gc.collectors.collection_time_in_millis[{#NAME}]"
-              delay: "0"
               units: ms
               preprocessing:
                 - type: JSONPATH
@@ -680,9 +657,12 @@ zabbix_export:
                   keys = Object.keys(data[0]);
                   b_ob = [];
                   for(i = 0; i < keys.length; i++ ){
-                    b_ob.push({"{#NAME}": keys[i]});
+                  b_ob.push({"{#NAME}": keys[i]});
                   }
 
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
+      tags:
+        - tag: target
+          value: opensearch
       macros:
         - macro: "{$CLUSTERNAME}"
