@@ -7,7 +7,7 @@ zabbix_export:
     - uuid: 6da9d11be12247099b42f9c99f72ab42
       template: "Opensearch Coordinating Node Monitoring"
       name: "Opensearch Coordinating Node Monitoring"
-      description: "This template is automatic added to Opensearch LLD discovered with the Coordinating roles:"
+      description: "This template is automatic added to Opensearch LLD discovered with the cluster manager role."
       groups:
         - name: "Opensearch"
       items:
@@ -15,7 +15,7 @@ zabbix_export:
           name: "Opensearch Discover nodes in cluster"
           type: SCRIPT
           key: opensearch.discover.nodes.stats
-          history: 1h
+          history: "0"
           value_type: TEXT
           trends: "0"
           params: |
@@ -26,7 +26,7 @@ zabbix_export:
             auth = btoa(parameters['username']+":"+parameters['password'])
             request = new HttpRequest();
             request.addHeader('Authorization: Basic '+auth);
-            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");
+            response = request.get("https://"+master+":"+port+"/_nodes/"+host+"/stats");  
             if(request.getStatus() == "200" ){
             	return response;
             }
@@ -48,3 +48,6 @@ zabbix_export:
               value: "9200"
             - name: username
               value: "{$OPENSEARCH.USERNAME}"
+          tags:
+            - tag: Type
+              value: raw
