@@ -2,6 +2,7 @@
 This  is  a Low level discovery of an opensearch cluster.
 
 ## How to use
+<<<<<<< HEAD
  Upload / Import the Template.yaml to get the base of the template and then you can update each template individually.
 
   
@@ -175,3 +176,19 @@ Here is the complete documentation for all the Zabbix templates provided in your
 | Search fetch time in millis | `opensearch.host.indices.search.fetch_time_in_millis` | DEPENDENT | Measures the time spent on fetch operations for searches. |
 | Disk read in bytes/s | `opensearch.host.fs.total.read_in_bytes` | DEPENDENT | Monitors the rate of disk reads in bytes per second. |
 | Disk write in bytes/s | `opensearch.host.fs.total.write_in_bytes` | DEPENDENT | Monitors the rate of disk writes in bytes per second. |
+=======
+Upload / Import the Template.yaml to get the base of the template and then you can update each template individually.
+The reason for this is to minimize custom edits.
+So you can upload the Template.yaml as a start and then customize to your liking.
+There is a standard alert for if the cluster is healthy.
+
+## TODO
++ create Dashboard template
++ customize trigger for host type
+
+Please come with suggestions that could be useful.
+``` 
+Recommended version of #Zabbix is 7.0 but 6.0+ should be able to do this aswell.
+
+```
+>>>>>>> 4b17fe931ee72f3954812103bc7f922b66924878
