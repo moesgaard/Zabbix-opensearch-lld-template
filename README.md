@@ -2,12 +2,7 @@
 This  is  a Low level discovery of an opensearch cluster.
 
 ## How to use
-<<<<<<< HEAD
  Upload / Import the Template.yaml to get the base of the template and then you can update each template individually.
-
-  
-Here is the complete documentation for all the Zabbix templates provided in your file, formatted as a Markdown document.
-
 ***
 
 # Zabbix Template Documentation
