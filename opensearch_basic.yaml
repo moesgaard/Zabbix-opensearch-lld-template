@@ -1,26 +1,26 @@
 zabbix_export:
-  version: "7.0"
+  version: '7.0'
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
       name: Opensearch
   templates:
     - uuid: e806e9868bcd4945b20946139001cff1
-      template: "Opensearch Basic Node Monitoring"
-      name: "Opensearch Basic Node Monitoring"
+      template: 'Opensearch Basic Node Monitoring'
+      name: 'Opensearch Basic Node Monitoring'
       description: |
         This template is automatic added to Opensearch LLD discovered hosts.
         this contains systemwide specs, that is not dependend on the role.
+      vendor:
+        name: moesgaardsdk
+        version: 7.0-0
       groups:
         - name: Opensearch
-      vendor:
-        name: "moesgaardsdk"
-        version: 7.0-0
       items:
         - uuid: 00e1f6c559c44a998344ccf246cde192
-          name: "Opensearch Discover basic discovery"
+          name: 'Opensearch Discover basic discovery'
           type: SCRIPT
           key: opensearch.discover.nodes.basic.stats
-          history: "0"
+          history: '0'
           value_type: TEXT
           params: |
             parameters = JSON.parse(value);
@@ -57,29 +57,29 @@ zabbix_export:
                   return JSON.stringify(newset);
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "120"
+                - '120'
           timeout: 30s
           parameters:
             - name: auth
-              value: "{$OPENSEARCH.APIKEY}"
+              value: '{$OPENSEARCH.APIKEY}'
             - name: host
-              value: "{$HOSTIP}"
+              value: '{$HOSTIP}'
             - name: master
-              value: "{$OPENSEARCH.MASTER}"
+              value: '{$OPENSEARCH.MASTER}'
             - name: password
-              value: "{$OPENSEARCH.PASSWORD}"
+              value: '{$OPENSEARCH.PASSWORD}'
             - name: port
-              value: "9200"
+              value: '9200'
             - name: username
-              value: "{$OPENSEARCH.USERNAME}"
+              value: '{$OPENSEARCH.USERNAME}'
           tags:
             - tag: Type
               value: raw
         - uuid: 3e8bed79b2474c3dbd285ff8ba395886
-          name: "Opensearch tasks"
+          name: 'Opensearch tasks'
           type: SCRIPT
           key: opensearch.discover.nodes.basic.tasks
-          history: "0"
+          history: '0'
           value_type: TEXT
           params: |
             parameters = JSON.parse(value);
@@ -96,26 +96,26 @@ zabbix_export:
           preprocessing:
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "120"
+                - '120'
           timeout: 30s
           parameters:
             - name: auth
-              value: "{$OPENSEARCH.APIKEY}"
+              value: '{$OPENSEARCH.APIKEY}'
             - name: host
-              value: "{$HOSTIP}"
+              value: '{$HOSTIP}'
             - name: master
-              value: "{$OPENSEARCH.MASTER}"
+              value: '{$OPENSEARCH.MASTER}'
             - name: password
-              value: "{$OPENSEARCH.PASSWORD}"
+              value: '{$OPENSEARCH.PASSWORD}'
             - name: port
-              value: "9200"
+              value: '9200'
             - name: username
-              value: "{$OPENSEARCH.USERNAME}"
+              value: '{$OPENSEARCH.USERNAME}'
           tags:
             - tag: Type
               value: raw
         - uuid: 07e68dba618440f0abd24d561fe3c260
-          name: "JVM Memory pools old used in bytes"
+          name: 'JVM Memory pools old used in bytes'
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.old.used_in_bytes
           units: B
@@ -125,10 +125,10 @@ zabbix_export:
                 - $..jvm.mem.pools.old.used_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -137,7 +137,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: c41b9f3a1698451e97adace9e7e9544f
-          name: "JVM Memory pools survivor used in bytes"
+          name: 'JVM Memory pools survivor used in bytes'
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.survivor.used_in_bytes
           units: B
@@ -147,10 +147,10 @@ zabbix_export:
                 - $..jvm.mem.pools.survivor.used_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -159,7 +159,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: 1d79a433f7374c8d8317c72a7ebf8126
-          name: "JVM Memory pools young used in bytes"
+          name: 'JVM Memory pools young used in bytes'
           type: DEPENDENT
           key: opensearch.host..jvm.mem.pools.young.used_in_bytes
           units: B
@@ -169,10 +169,10 @@ zabbix_export:
                 - $..jvm.mem.pools.young.used_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -181,7 +181,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: 38e0d8e5831e4fb39bdcd79c44e33eaa
-          name: "JVM System Uptime"
+          name: 'JVM System Uptime'
           type: DEPENDENT
           key: opensearch.host..jvm.uptime_in_millis
           units: s
@@ -191,10 +191,10 @@ zabbix_export:
                 - $..jvm.uptime_in_millis
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: MULTIPLIER
               parameters:
-                - "0.001"
+                - '0.001'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -203,7 +203,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: 4e2976cdc98949b4abbc8da7bb7408f3
-          name: "FS IO stats read operrations"
+          name: 'FS IO stats read operrations'
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.read_operations
           preprocessing:
@@ -212,10 +212,10 @@ zabbix_export:
                 - $..fs.io_stats.total.read_operations
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -224,7 +224,7 @@ zabbix_export:
             - tag: Resource
               value: Filesystem
         - uuid: 9bf747328b224e1b9bdabccb13a7a631
-          name: "FS IO stats read  time in ms"
+          name: 'FS IO stats read  time in ms'
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.read_time
           units: s
@@ -234,13 +234,13 @@ zabbix_export:
                 - $..fs.io_stats.total.read_time
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: MULTIPLIER
               parameters:
-                - "0.001"
+                - '0.001'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -249,7 +249,7 @@ zabbix_export:
             - tag: Resource
               value: Filesystem
         - uuid: f1d8017fbb9e42ae9a7b297bbabb78c9
-          name: "FS IO stats write operrations"
+          name: 'FS IO stats write operrations'
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.write_operations
           preprocessing:
@@ -258,10 +258,10 @@ zabbix_export:
                 - $..fs.io_stats.total.write_operations
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -270,7 +270,7 @@ zabbix_export:
             - tag: Resource
               value: Filesystem
         - uuid: 3271edfb963d409e9c0128bcc2bfcb0e
-          name: "FS IO stat write time in ms"
+          name: 'FS IO stat write time in ms'
           type: DEPENDENT
           key: opensearch.host.fs.io_stats.total.write_time
           units: s
@@ -280,13 +280,13 @@ zabbix_export:
                 - $..fs.io_stats.total.write_time
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: MULTIPLIER
               parameters:
-                - "0.001"
+                - '0.001'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -295,7 +295,7 @@ zabbix_export:
             - tag: Resource
               value: Filesystem
         - uuid: 6fed990b7bd644fd9981268e433d1982
-          name: "FS total free in bytes"
+          name: 'FS total free in bytes'
           type: DEPENDENT
           key: opensearch.host.fs.total.free_in_bytes
           units: B
@@ -305,10 +305,10 @@ zabbix_export:
                 - $..fs.total.free_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -316,8 +316,21 @@ zabbix_export:
               value: disk
             - tag: Resource
               value: Filesystem
+          triggers:
+            - uuid: 8e783bfa03d54f229b8769d442ed56b4
+              expression: 'forecast(/Opensearch Basic Node Monitoring/opensearch.host.fs.total.free_in_bytes,{$OPENSEARCH.TIME.FORECAST.LOOK.BACK},{$OPENSEARCH.TIME.FORECAST.PREDICT.FORWARD})<{$OPENSEARCH.TOTAL.FREESPACE}'
+              name: 'Disk is about to run low'
+              priority: WARNING
+              description: |
+                Forecast of when will node run out of space.
+                Lookback
+                {$OPENSEARCH.TIME.FORECAST.LOOK.BACK}
+                Predict when
+                {$OPENSEARCH.TIME.FORECAST.PREDICT.FORWARD}
+                Space Left to trigger.
+                {$OPENSEARCH.TOTAL.FREESPACE}
         - uuid: cd23a07104694da1b4d835c26095cbed
-          name: "JVM Memory Heap Max"
+          name: 'JVM Memory Heap Max'
           type: DEPENDENT
           key: opensearch.host.jvm.mem.heap_max_in_bytes
           units: B
@@ -327,10 +340,10 @@ zabbix_export:
                 - $..jvm.mem.heap_max_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -339,7 +352,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: 08561cd060e64a6b87deceb6dbab2806
-          name: "JVM Memory Heap Used"
+          name: 'JVM Memory Heap Used'
           type: DEPENDENT
           key: opensearch.host.jvm.mem.heap_used_in_bytes
           units: B
@@ -349,10 +362,10 @@ zabbix_export:
                 - $..jvm.mem.heap_used_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -361,7 +374,7 @@ zabbix_export:
             - tag: Resource
               value: JVM
         - uuid: af74134a4b4a456994407bc3d405446c
-          name: "OS CPU Load avg 1 min"
+          name: 'OS CPU Load avg 1 min'
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.1m
           preprocessing:
@@ -370,10 +383,10 @@ zabbix_export:
                 - $..os.cpu.load_average.1m
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -382,7 +395,7 @@ zabbix_export:
             - tag: Resource
               value: OS
         - uuid: 58019f35a10145fd972fd674af5005f5
-          name: "OS CPU Load avg 5 min"
+          name: 'OS CPU Load avg 5 min'
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.5m
           preprocessing:
@@ -391,10 +404,10 @@ zabbix_export:
                 - $..os.cpu.load_average.5m
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -403,7 +416,7 @@ zabbix_export:
             - tag: Resource
               value: OS
         - uuid: 3e4de290e1754e499dbe1505e45d4342
-          name: "OS CPU Load avg 15 min"
+          name: 'OS CPU Load avg 15 min'
           type: DEPENDENT
           key: opensearch.host.os.cpu.load_average.15m
           preprocessing:
@@ -412,10 +425,10 @@ zabbix_export:
                 - $..os.cpu.load_average.15m
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -424,7 +437,7 @@ zabbix_export:
             - tag: Resource
               value: OS
         - uuid: acfedc3f55ac47a3b4e266a9bb159d5a
-          name: "OS CPU percent used"
+          name: 'OS CPU percent used'
           type: DEPENDENT
           key: opensearch.host.os.cpu.persent
           preprocessing:
@@ -433,10 +446,10 @@ zabbix_export:
                 - $..os.cpu.percent
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -445,7 +458,7 @@ zabbix_export:
             - tag: Resource
               value: OS
         - uuid: 9206043d867c4705895eb7618e31c898
-          name: "OS Memory Used"
+          name: 'OS Memory Used'
           type: DEPENDENT
           key: opensearch.host.os.mem.used_in_bytes
           units: B
@@ -455,10 +468,10 @@ zabbix_export:
                 - $..os.mem.used_in_bytes
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           tags:
@@ -468,125 +481,125 @@ zabbix_export:
               value: OS
       discovery_rules:
         - uuid: 4fc2cbf911434f42918f5dd942f22dea
-          name: "Thread pool low level discovery"
+          name: 'Thread pool low level discovery'
           type: DEPENDENT
           key: opensearch.lld.host.thread_pool
           filter:
             conditions:
-              - macro: "{#NAME}"
-                value: "{$OPENSEARCH.THREADPOOL.FILTER}"
+              - macro: '{#NAME}'
+                value: '{$OPENSEARCH.THREADPOOL.FILTER}'
           item_prototypes:
             - uuid: 075cc53f2e55479bbca4bab19b8d57a5
-              name: "Thread {#NAME} active size"
+              name: 'Thread {#NAME} active size'
               type: DEPENDENT
-              key: "opensearch.host.thread_pool.active[{#NAME}]"
+              key: 'opensearch.host.thread_pool.active[{#NAME}]'
               preprocessing:
                 - type: JSONPATH
                   parameters:
                     - '$..thread_pool["{#NAME}"].active'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
                 - type: DISCARD_UNCHANGED_HEARTBEAT
                   parameters:
-                    - "3600"
+                    - '3600'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
                 - tag: component
                   value: Thread
                 - tag: Resource
-                  value: "Thread Pool"
+                  value: 'Thread Pool'
             - uuid: 8111416c90d4438bbf303741ac7065fb
-              name: "Thread {#NAME} queue size"
+              name: 'Thread {#NAME} queue size'
               type: DEPENDENT
-              key: "opensearch.host.thread_pool.queue[{#NAME}]"
+              key: 'opensearch.host.thread_pool.queue[{#NAME}]'
               preprocessing:
                 - type: JSONPATH
                   parameters:
                     - '$..thread_pool["{#NAME}"].queue'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
                 - type: DISCARD_UNCHANGED_HEARTBEAT
                   parameters:
-                    - "3600"
+                    - '3600'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
                 - tag: component
                   value: Thread
                 - tag: Resource
-                  value: "Thread Pool"
+                  value: 'Thread Pool'
             - uuid: d662b03f19f54b63930ff4c074091e7a
-              name: "Thread {#NAME} rejected size"
+              name: 'Thread {#NAME} rejected size'
               type: DEPENDENT
-              key: "opensearch.host.thread_pool.rejected[{#NAME}]"
+              key: 'opensearch.host.thread_pool.rejected[{#NAME}]'
               preprocessing:
                 - type: JSONPATH
                   parameters:
                     - '$..thread_pool["{#NAME}"].rejected'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
                 - type: DISCARD_UNCHANGED_HEARTBEAT
                   parameters:
-                    - "3600"
+                    - '3600'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
                 - tag: component
                   value: Thread
                 - tag: Resource
-                  value: "Thread Pool"
+                  value: 'Thread Pool'
             - uuid: f67a7ba4312c4c6da3820c96af6454c5
-              name: "Thread {#NAME} threads size"
+              name: 'Thread {#NAME} threads size'
               type: DEPENDENT
-              key: "opensearch.host.thread_pool.threads[{#NAME}]"
+              key: 'opensearch.host.thread_pool.threads[{#NAME}]'
               preprocessing:
                 - type: JSONPATH
                   parameters:
                     - '$..thread_pool["{#NAME}"].threads'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
                 - type: DISCARD_UNCHANGED_HEARTBEAT
                   parameters:
-                    - "3600"
+                    - '3600'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
                 - tag: component
                   value: Thread
                 - tag: Resource
-                  value: "Thread Pool"
+                  value: 'Thread Pool'
           graph_prototypes:
             - uuid: 1a95742034324aa598890a0e6cbbacfe
-              name: "{#CLUSTERNAME} : Thread {#NAME}"
+              name: '{#CLUSTERNAME} : Thread {#NAME}'
               graph_items:
                 - color: 199C0D
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch Basic Node Monitoring"
-                    key: "opensearch.host.thread_pool.active[{#NAME}]"
-                - sortorder: "1"
+                    host: 'Opensearch Basic Node Monitoring'
+                    key: 'opensearch.host.thread_pool.active[{#NAME}]'
+                - sortorder: '1'
                   color: F63100
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch Basic Node Monitoring"
-                    key: "opensearch.host.thread_pool.queue[{#NAME}]"
-                - sortorder: "2"
+                    host: 'Opensearch Basic Node Monitoring'
+                    key: 'opensearch.host.thread_pool.queue[{#NAME}]'
+                - sortorder: '2'
                   color: 2774A4
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch Basic Node Monitoring"
-                    key: "opensearch.host.thread_pool.rejected[{#NAME}]"
-                - sortorder: "3"
+                    host: 'Opensearch Basic Node Monitoring'
+                    key: 'opensearch.host.thread_pool.rejected[{#NAME}]'
+                - sortorder: '3'
                   color: F7941D
                   calc_fnc: ALL
                   item:
-                    host: "Opensearch Basic Node Monitoring"
-                    key: "opensearch.host.thread_pool.threads[{#NAME}]"
+                    host: 'Opensearch Basic Node Monitoring'
+                    key: 'opensearch.host.thread_pool.threads[{#NAME}]'
           master_item:
             key: opensearch.discover.nodes.basic.stats
           preprocessing:
@@ -602,35 +615,35 @@ zabbix_export:
                   for(i = 0; i < keys.length; i++ ){
                   b_ob.push({"{#NAME}": keys[i],"{#CLUSTERNAME}": "{$CLUSTERNAME}"});
                   }
-
+                  
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
         - uuid: 4089547f5be541bbbc808e8e78c1bd10
-          name: "Garbage Collector"
+          name: 'Garbage Collector'
           type: DEPENDENT
           key: opensearch.lld.jvm.gc.collector
           enabled_lifetime_type: DISABLE_AFTER
           enabled_lifetime: 1h
           item_prototypes:
             - uuid: 9b0fc159d2024165ad3afea20c5b9d48
-              name: "Garbage Collector  {#NAME}  collection count"
+              name: 'Garbage Collector  {#NAME}  collection count'
               type: DEPENDENT
-              key: "opensearch.lld.host.jvm.gc.collectors.collection_count[{#NAME}]"
+              key: 'opensearch.lld.host.jvm.gc.collectors.collection_count[{#NAME}]'
               preprocessing:
                 - type: JSONPATH
                   parameters:
                     - '$..jvm.gc.collectors.["{#NAME}"].collection_count'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
                 - tag: component
                   value: collector
             - uuid: 1d15b8d98ea248f782ed3fffe1794852
-              name: "Garbage Collector  {#NAME}  collection time in milliseconds"
+              name: 'Garbage Collector  {#NAME}  collection time in milliseconds'
               type: DEPENDENT
-              key: "opensearch.lld.host.jvm.gc.collectors.collection_time_in_millis[{#NAME}]"
+              key: 'opensearch.lld.host.jvm.gc.collectors.collection_time_in_millis[{#NAME}]'
               units: ms
               preprocessing:
                 - type: JSONPATH
@@ -638,7 +651,7 @@ zabbix_export:
                     - '$..jvm.gc.collectors.["{#NAME}"].collection_time_in_millis'
                 - type: TRIM
                   parameters:
-                    - "[]"
+                    - '[]'
               master_item:
                 key: opensearch.discover.nodes.basic.stats
               tags:
@@ -659,10 +672,10 @@ zabbix_export:
                   for(i = 0; i < keys.length; i++ ){
                   b_ob.push({"{#NAME}": keys[i]});
                   }
-
+                  
                   return '{ "data" : '+JSON.stringify(b_ob)+'}';
       tags:
         - tag: target
           value: opensearch
       macros:
-        - macro: "{$CLUSTERNAME}"
+        - macro: '{$CLUSTERNAME}'

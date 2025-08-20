@@ -1,24 +1,24 @@
 zabbix_export:
-  version: "7.0"
+  version: '7.0'
   template_groups:
     - uuid: f43b9a15b7374df3ad367ead192d0c64
       name: Opensearch
   templates:
     - uuid: 2bc1addd9ff642b98d6fff634ca7c256
-      template: "Opensearch Ingest Node Monitoring"
-      name: "Opensearch Ingest Node Monitoring"
-      description: "This template is automatic added to Opensearch LLD  discovered with the Ingest role."
+      template: 'Opensearch Ingest Node Monitoring'
+      name: 'Opensearch Ingest Node Monitoring'
+      description: 'This template is automatic added to Opensearch LLD  discovered with the Ingest role.'
+      vendor:
+        name: moesgaardsdk
+        version: 7.0-0
       groups:
         - name: Opensearch
-      vendor:
-        name: "moesgaardsdk"
-        version: 7.0-0
       items:
         - uuid: 40af50735e71463294f3bac0247cf6e3
-          name: "Opensearch Discover nodes in cluster"
+          name: 'Opensearch Discover nodes in cluster'
           type: SCRIPT
           key: opensearch.discover.nodes.stats
-          history: "0"
+          history: '0'
           value_type: TEXT
           params: |
             parameters = JSON.parse(value);
@@ -38,26 +38,26 @@ zabbix_export:
                 - $.nodes
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "120"
+                - '120'
           timeout: 30s
           parameters:
             - name: auth
-              value: "{$OPENSEARCH.APIKEY}"
+              value: '{$OPENSEARCH.APIKEY}'
             - name: host
-              value: "{$HOSTIP}"
+              value: '{$HOSTIP}'
             - name: master
-              value: "{$OPENSEARCH.MASTER}"
+              value: '{$OPENSEARCH.MASTER}'
             - name: password
-              value: "{$OPENSEARCH.PASSWORD}"
+              value: '{$OPENSEARCH.PASSWORD}'
             - name: port
-              value: "9200"
+              value: '9200'
             - name: username
-              value: "{$OPENSEARCH.USERNAME}"
+              value: '{$OPENSEARCH.USERNAME}'
           tags:
             - tag: Type
               value: raw
         - uuid: 1c529a6632cf4b2e9de6c4e88afea3da
-          name: "Total count of Ingest"
+          name: 'Total count of Ingest'
           type: DEPENDENT
           key: opensearch.ingesthost.count
           preprocessing:
@@ -66,14 +66,14 @@ zabbix_export:
                 - $..ingest.total.count
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.stats
         - uuid: 8ea0937f9ce9498fb8a4e1bdbf302e93
-          name: "Total count of failed Ingest"
+          name: 'Total count of failed Ingest'
           type: DEPENDENT
           key: opensearch.ingesthost.failed
           preprocessing:
@@ -82,14 +82,14 @@ zabbix_export:
                 - $..ingest.total.failed
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.stats
         - uuid: c51816a500924cbcb63cff637d584f10
-          name: "Http connection currently Opened"
+          name: 'Http connection currently Opened'
           type: DEPENDENT
           key: opensearch.ingesthost.http.current_open
           preprocessing:
@@ -98,14 +98,14 @@ zabbix_export:
                 - $..http.current_open
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.stats
         - uuid: 3bf3700b7c3c49f6a121ec15ef8b85fe
-          name: "Http connection Total Opened"
+          name: 'Http connection Total Opened'
           type: DEPENDENT
           key: opensearch.ingesthost.http.total_opened
           preprocessing:
@@ -114,14 +114,14 @@ zabbix_export:
                 - $..http.total_opened
             - type: TRIM
               parameters:
-                - "[]"
+                - '[]'
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.stats
         - uuid: 22eb0b8494194dcf95207032cdc50464
-          name: "Pipelines in use"
+          name: 'Pipelines in use'
           type: DEPENDENT
           key: opensearch.ingesthost.pipelines
           value_type: TEXT
@@ -131,7 +131,7 @@ zabbix_export:
                 - $..ingest.pipelines
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - "3600"
+                - '3600'
           master_item:
             key: opensearch.discover.nodes.stats
       tags:

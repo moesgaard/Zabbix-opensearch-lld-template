@@ -1,0 +1,25 @@
+zabbix_export:
+   version: '7.0'
+  host_groups:
+    - uuid: e8bb56d1165c47cbad0b850f5576fec8
+      name: Opensearch
+    - uuid: 17e5e22a757747d1ba17d80e831fea04
+      name: Opensearch/Cluster
+  hosts:
+    - host: opensearch
+      name: opensearch
+      templates:
+        - name: 'Opensearch Cluster Discovery'
+      groups:
+        - name: Opensearch
+        - name: Opensearch/Cluster
+      macros:
+        - macro: '{$CLUSTERNAME}'
+          value: ''
+        - macro: '{$OPENSEARCH.MASTER.LIST}'
+          value: ''
+        - macro: '{$OPENSEARCH.PASSWORD}'
+          type: SECRET_TEXT
+        - macro: '{$OPENSEARCH.USERNAME}'
+          type: SECRET_TEXT
+      inventory_mode: AUTOMATIC
