@@ -1,0 +1,182 @@
+# docker-compose.yml
+# This file sets up a secure OpenSearch cluster with dedicated containers for each primary node role.
+version: '3.8'
+services:
+  # The master-eligible node. It's responsible for managing the cluster state.
+  opensearch-master:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-master
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-master
+      - discovery.seed_hosts=opensearch-master,opensearch-data
+      - cluster.initial_master_nodes=opensearch-master
+      - node.roles=master
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      # Environment variables for security
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD= # <-- CHANGE THIS PASSWORD
+      - plugins.security.ssl.http.enabled=false
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The data node. It holds the data and performs data-related operations.
+  opensearch-data:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-data
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-data
+      - discovery.seed_hosts=opensearch-master
+      - cluster.initial_master_nodes=opensearch-master
+      - node.roles=data
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=  # <-- CHANGE THIS PASSWORD   
+      # Environment variables for security
+      - plugins.security.ssl.http.enabled=false
+    volumes:
+      - opensearch-data2:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The data node. It holds the data and performs data-related operations.
+  opensearch-data1:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-data1
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-data1
+      - discovery.seed_hosts=opensearch-master
+      - cluster.initial_master_nodes=opensearch-master
+      - node.roles=data
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD= # <-- CHANGE THIS PASSWORD   
+      # Environment variables for security
+      - plugins.security.ssl.http.enabled=false
+    volumes:
+      - opensearch-data3:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The ingest node. It's dedicated to pre-processing documents before indexing.
+  opensearch-ingest:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-ingest
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-ingest
+      - discovery.seed_hosts=opensearch-master
+      - cluster.initial_master_nodes=opensearch-master
+      - node.roles=ingest
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD= # <-- CHANGE THIS PASSWORD
+      # Environment variables for security
+      - plugins.security.ssl.http.enabled=false
+    volumes:
+      - ./opensearch_security_config:/usr/share/opensearch/config/opensearch_security_config
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The search node. It's dedicated to handling search and query requests.
+  opensearch-search:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-search
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-search
+      - discovery.seed_hosts=opensearch-master
+      - cluster.initial_master_nodes=opensearch-master
+      - node.roles=search
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=  # <-- CHANGE THIS PASSWORD
+      # Environment variables for security
+      - plugins.security.ssl.http.enabled=false
+    volumes:
+      - ./opensearch_security_config:/usr/share/opensearch/config/opensearch_security_config
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The coordinating-only node. This node handles client requests and routes them to other nodes.
+  opensearch-coordinating:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: opensearch-coordinating
+    ports:
+      - "9200:9200" # Exposes the HTTP API port
+      - ""
+    environment:
+      - cluster.name=opensearch-docker-cluster
+      - node.name=opensearch-coordinating
+      - discovery.seed_hosts=opensearch-master
+      - cluster.initial_master_nodes=opensearch-master
+
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=  # <-- CHANGE THIS PASSWORD
+      # Environment variables for security
+      - plugins.security.ssl.http.enabled=true
+    volumes:
+      - ./opensearch_security_config:/usr/share/opensearch/config/opensearch_security_config
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    networks:
+      - opensearch-net
+
+  # The OpenSearch Dashboards service for data visualization and management.
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.15.0
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-coordinating:9200"]'
+      OPENSEARCH_USERNAME: 'admin'
+      OPENSEARCH_PASSWORD: '' # <-- CHANGE THIS PASSWORD
+    volumes:
+      - ./opensearch_security_config:/usr/share/opensearch-dashboards/config/opensearch_security_config
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-coordinating
+volumes:
+  opensearch-data1:
+  opensearch-data2:
+  opensearch-data3:
+
+
+networks:
+  opensearch-net:
+    name: opensearch-net
