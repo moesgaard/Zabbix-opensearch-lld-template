@@ -4,7 +4,7 @@ This  is  a Low level discovery of an opensearch cluster.
 ## How to use
 Upload / Import the opensearch_complete_templates.yaml to get the base of the template and then you can update each template individually.
 The reason for this is to minimize custom edits.
-So you can upload the Template.yaml as a start and then customize to your liking.
+So you can upload the opensearch_complete_templates.yaml as a start and then customize to your liking.
 There is a standard alert for if the cluster is healthy.
 
 ## TODO
